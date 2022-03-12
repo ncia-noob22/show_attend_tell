@@ -1,0 +1,12 @@
+path_pretrained: null
+only_train: true
+
+# model
+
+# loss
+
+# data
+dir_data: '/data/torch/VOCdetection'
+# train
+
+# infer
