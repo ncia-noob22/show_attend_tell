@@ -6,7 +6,9 @@ only_train: true
 # loss
 
 # data
-dir_data: '/data/torch/VOCdetection'
+dir_img: '/data/torch/Flickr30k/img'
+dir_ann: '/data/torch/Flickr30k/ann'
+
 # train
 
 # infer
