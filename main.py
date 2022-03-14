@@ -7,17 +7,16 @@ sys.path.append(ljh_dir)
 import yaml
 import torch
 import torch.optim as optim
-from model import YOLOv1
+from model import CNNEncoder, RNNDecoder
 from loss import Loss
 from dataset import get_dataloaders
 from train import train
-
-# from utils import get_bboxes, calculate_mAP
 
 
 def main():
     # basic settings
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    torch.hub.set_dir("./tmp/checkpoints/")
 
     with open(f"{ljh_dir}/config.yaml", "r") as f:
         config = yaml.load(f, yaml.FullLoader)
@@ -29,7 +28,7 @@ def main():
     trainloader, testloader = get_dataloaders(**config)
 
     # load model
-    model = YOLOv1(**config).to(device)
+    model = CNNEncoder(**config).to(device)
     if path_pretrained:
         model.load_state_dict(path_pretrained)
 
