@@ -2,10 +2,11 @@ import torch.nn as nn
 from torchvision.models import vgg11
 
 # !
+size_enc = 14
 import torch
 
-size_enc = 14
-torch.hub.set_dir("./tmp/")
+dir_hub = "./hub/"
+torch.hub.set_dir(dir_hub)
 # !
 
 
@@ -86,6 +87,8 @@ class RNNDecoder(nn.Module):
         emb_txt = self.embedding(encoded_txt)
 
         c, h = self.init_rnn(encoded_img)
+
+        # ~ need to study and align with dataset
 
 
 if __name__ == "__main__":

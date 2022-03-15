@@ -6,11 +6,15 @@ sys.path.append(ljh_dir)
 
 import yaml
 import torch
+import torch.nn as nn
 import torch.optim as optim
 from model import CNNEncoder, RNNDecoder
-from loss import Loss
-from dataset import get_dataloaders
+from dataset import get_dataloader
 from train import train
+
+#!
+num_epoch = 100
+#!
 
 
 def main():
@@ -25,43 +29,23 @@ def main():
     num_epoch = config["num_epoch"]
 
     # load data loaders
-    trainloader, testloader = get_dataloaders(**config)
+    trainloader, validloader = get_dataloader(**config)
 
-    # load model
-    model = CNNEncoder(**config).to(device)
+    # load models
+    encoder, decoder = CNNEncoder(**config).to(device), RNNDecoder(**config).to(device)
     if path_pretrained:
-        model.load_state_dict(path_pretrained)
+        encoder.load_state_dict(path_pretrained)
+        decoder.load_state_dict(path_pretrained)
 
     # load loss function
-    loss = Loss(**config)
+    loss = nn.CrossEntropyLoss().to(device)
 
-    # load optimizer and schedule learning rate
-    opt = optim.SGD(
-        model.parameters(),
-        lr=1e-3,
-        momentum=config["momentum"],
-        weight_decay=config["weight_decay"],
-    )
+    for epoch in range(num_epoch):
 
-    criteria_lr = (int(num_epoch * 0.55), int(num_epoch * 0.77))
+        # train models
+        train()
 
-    def schedule_lr(epoch):
-        """Change learning rate based on the paper"""
-        if epoch == 0:
-            return 1e-3
-        elif epoch < criteria_lr[0]:
-            return 1e-2
-        elif epoch < criteria_lr[1]:
-            return 1e-3
-        else:
-            return 1e-4
-
-    sched = optim.lr_scheduler.LambdaLR(opt, schedule_lr)
-
-    # train model
-    if only_train:
-        for epoch in range(num_epoch):
-            train(trainloader, model, opt, sched, loss, epoch, device)
+        # validate models
 
 
 if __name__ == "__main__":

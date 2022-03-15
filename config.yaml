@@ -1,19 +1,18 @@
-path_pretrained: null
-only_train: true
+pretrained_enc: 'pts_enc/'
+pretrained_dec: 'pts_dec/'
 
 # model
 size_enc: 14
 
-# loss
-a: 1
-
 # data
-dir_img: '/data/Flickr30k/img'
-dir_ann: '/data/Flickr30k/ann'
+dir_img: '/data/Flickr30k/img/'
+path_ann: '/data/Flickr30k/ann/results_20130124.token'
 type_attn: 'soft'
 
 # train
-b: 1
+dir_hub: 'hub/'
+num_epoch: 100
+num_batch: 64
 
-# infer
+# caption
 c: 1
