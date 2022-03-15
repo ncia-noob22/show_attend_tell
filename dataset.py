@@ -1,12 +1,16 @@
 from PIL import Image
 import torch
-from torchvision.datasets import Flickr30k
+from torchvision.datasets import Flickr30k, CocoCaptions
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
 
 class CustomFlickr30k:
     """Custom Flickr30k dataset"""
+
+
+class CustomCocoCaptions:
+    """Custom MS COCO dataset"""
 
 
 def get_dataloaders(dir_img, dir_ann, batch_size, only_train, **kwargs):

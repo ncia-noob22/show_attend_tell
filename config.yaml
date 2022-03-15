@@ -2,13 +2,18 @@ path_pretrained: null
 only_train: true
 
 # model
+size_enc: 14
 
 # loss
+a: 1
 
 # data
-dir_img: '/data/torch/Flickr30k/img'
-dir_ann: '/data/torch/Flickr30k/ann'
+dir_img: '/data/Flickr30k/img'
+dir_ann: '/data/Flickr30k/ann'
+type_attn: 'soft'
 
 # train
+b: 1
 
 # infer
+c: 1
