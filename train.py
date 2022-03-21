@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from model import CNNEncoder, RNNDecoder
-from dataset import get_dataloader
+from dataset import get_dataloaders
 
 #!
 dir_hub = "./"
@@ -32,13 +32,13 @@ def main():
 
     # load models
     encoder, decoder = CNNEncoder(**config).to(device), RNNDecoder(**config).to(device)
-    if pretrained_enc:
+    if os.path.exists(pretrained_enc):
         encoder.load_state_dict(pretrained_enc)
-    if pretrained_dec:
+    if os.path.exists(pretrained_dec):
         decoder.load_state_dict(pretrained_dec)
 
     # load data loaders
-    trainloader, validloader = get_dataloader(**config)
+    trainloader, validloader = get_dataloaders(**config)
 
     # load loss function
     loss = nn.CrossEntropyLoss().to(device)
@@ -92,7 +92,6 @@ def validate(validloader, encoder, decoder, loss, epoch, device, **kwargs):
     with torch.no_grad():
         for imgs, caps in tqdm(validloader):
             imgs, caps = imgs.to(device), caps.to(device)
-
 
 if __name__ == "__main__":
     main()

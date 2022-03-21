@@ -101,5 +101,6 @@ if __name__ == "__main__":
     with open("config.yaml", "r") as f:
         config = yaml.load(f, yaml.FullLoader)
 
-    model = CNNEncoder(**config).to(device)
+    encoder = CNNEncoder(**config).to(device)
+    decoder = RNNDecoder(**config).to(device)
     print(torchsummary.summary(model, (3, 448, 448), device=device.split(":")[0]))
