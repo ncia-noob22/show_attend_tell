@@ -5,7 +5,7 @@ from torchvision.models import vgg11
 size_enc = 14
 import torch
 
-dir_hub = "./hub/"
+dir_hub = "./"
 torch.hub.set_dir(dir_hub)
 # !
 
@@ -60,7 +60,7 @@ class RNNDecoder(nn.Module):
     """LSTM-based decoder"""
 
     def __init__(
-        self, dim_enc, dim_dec, dim_attn, dim_emb, size_voca, type_attn, **kwargs
+        self, dim_enc, dim_dec, dim_attn, dim_emb, size_vocab, type_attn, **kwargs
     ):
         super().__init__()
         self.dim_enc = dim_enc
@@ -73,7 +73,7 @@ class RNNDecoder(nn.Module):
 
         self.decoder = nn.LSTM(dim_enc, dim_dec)
 
-        self.embedding = nn.Embedding(size_voca, dim_emb)
+        self.embedding = nn.Embedding(size_vocab, dim_emb)
 
     def init_rnn(self, encoded_img):
         init_c = nn.Linear(self.dim_enc, self.dim_dec)

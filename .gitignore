@@ -1,6 +1,9 @@
 # Temporary File
 tmp*
 
+# Large File
+checkpoints/vgg11*.pth
+
 # OS File
 *.deb
 .DS_Store

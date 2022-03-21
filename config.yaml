@@ -1,17 +1,17 @@
-pretrained_enc: 'pts_enc/'
-pretrained_dec: 'pts_dec/'
+pretrained_enc: "checkpoints/pretrained_enc.pth"
+pretrained_dec: "checkpoints/pretrained_dec.pth"
 
 # model
 size_enc: 14
 
 # data
-dir_img: '/data/Flickr30k/img/'
-path_ann: '/data/Flickr30k/ann/results_20130124.token'
-type_attn: 'soft'
+dir_img: "/data/Flickr30k/img/"
+path_ann: "/data/Flickr30k/ann/results_20130124.token"
+type_attn: "soft"
 
 # train
-dir_hub: 'hub/'
-num_epoch: 100
+dir_hub: "./"
+num_epoch: 1
 num_batch: 64
 
 # caption
