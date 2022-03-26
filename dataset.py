@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from torchvision.datasets import Flickr30k
 import torch.utils.data as data
 import torchvision.transforms as transforms
-from utils import create_voca2id
+from utils import create_vocab2id
 
 
 class CustomFlickr30k(Flickr30k):
@@ -29,10 +29,10 @@ class CustomFlickr30k(Flickr30k):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        voca2id = create_voca2id(self.ann_file, ths_voca=5)
+        vocab2id = create_vocab2id(self.ann_file, ths_vocab=5)
         len_caption_max = max(len(caption.split()) for caption in target)
         target = [
-            torch.Tensor([voca2id.get(word, 0) for word in caption.split()])
+            torch.Tensor([vocab2id.get(word, 0) for word in caption.split()])
             for caption in target
         ]
         target = torch.stack(

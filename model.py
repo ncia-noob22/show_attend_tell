@@ -42,8 +42,8 @@ class SoftAttention(nn.Module):
         score = self.attn_last(
             self.tanh(self.attn_img(encoded_img) + self.attn_txt(previous_txt))
         )
-        attention = self.softmax(score) * encoded_img
-        return attention
+        attn = self.softmax(score) * encoded_img
+        return attn
 
 
 class HardAttention(nn.Module):
@@ -66,14 +66,18 @@ class RNNDecoder(nn.Module):
         self.dim_enc = dim_enc
         self.dim_dec = dim_dec
 
+        self.decoder = nn.LSTMCell(dim_enc + dim_emb, dim_dec)
+
         if type_attn.lower() == "soft":
             self.attn = SoftAttention(dim_enc, dim_dec, dim_attn)
         elif type_attn.lower() == "hard":
-            self.attn = HardAttention()
-
-        self.decoder = nn.LSTM(dim_enc, dim_dec)
+            self.attn = HardAttention(dim_enc, dim_dec, dim_attn)
 
         self.embedding = nn.Embedding(size_vocab, dim_emb)
+
+        self.f_beta = nn.Linear(dim_dec, dim_enc)
+        self.sigmoid = nn.Sigmoid()
+        self.fc = nn.Linear(dim_dec, size_vocab)
 
     def init_rnn(self, encoded_img):
         init_c = nn.Linear(self.dim_enc, self.dim_dec)
@@ -103,4 +107,5 @@ if __name__ == "__main__":
 
     encoder = CNNEncoder(**config).to(device)
     decoder = RNNDecoder(**config).to(device)
+
     print(torchsummary.summary(model, (3, 448, 448), device=device.split(":")[0]))

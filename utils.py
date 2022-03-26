@@ -2,12 +2,12 @@ from collections import Counter
 import torch
 
 
-def create_voca2id(path_ann, ths_voca):
+def create_vocab2id(path_ann, ths_vocab):
     """Create vocabulary map
 
     Args:
         path_ann : path to annotation file
-        ths_voca (optional): threshold for vocabulary count
+        ths_vocab (optional): threshold for vocabulary count
     """
 
     with open(path_ann, "r") as f:
@@ -18,21 +18,23 @@ def create_voca2id(path_ann, ths_voca):
         word for ann in lst_ann for word in ann.strip("\n").split("\t")[-1].split()
     )
 
-    vocas = [voca for voca in counter.keys() if counter[voca] > ths_voca]
+    vocabs = [vocab for vocab in counter.keys() if counter[vocab] > ths_vocab]
 
-    voca2id = {voca: id + 4 for id, voca in enumerate(vocas)}
-    voca2id["<START>"] = len(voca2id) + 1
-    voca2id["<END>"] = len(voca2id) + 1
-    voca2id["<UNK>"] = len(voca2id) + 1
-    voca2id["<PAD>"] = 0
+    vocab2id["<PAD>"] = 0
+    vocab2id = {vocab: id + 4 for id, vocab in enumerate(vocabs, 1)}
+    vocab2id["<START>"] = len(vocab2id) + 1
+    vocab2id["<END>"] = len(vocab2id) + 1
+    vocab2id["<UNK>"] = len(vocab2id) + 1
 
-    return voca2id, vocas
+    return vocab2id, vocabs
 
 
-def decode_caption(caption, voca2id):
+def decode_caption(caption, vocab2id):
     """Decode caption based on vocabulary map"""
-    id2voca = {id: voca for voca, id in voca2id.items()}
-    return " ".join([id2voca[id] for id in caption if not id2voca[id].startswith("<")])
+    id2vocab = {id: vocab for vocab, id in vocab2id.items()}
+    return " ".join(
+        [id2vocab[id] for id in caption if not id2vocab[id].startswith("<")]
+    )
 
 
 def calculate_BLEU():
