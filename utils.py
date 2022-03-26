@@ -20,8 +20,8 @@ def create_vocab2id(path_ann, ths_vocab):
 
     vocabs = [vocab for vocab in counter.keys() if counter[vocab] > ths_vocab]
 
-    vocab2id["<PAD>"] = 0
     vocab2id = {vocab: id + 4 for id, vocab in enumerate(vocabs, 1)}
+    vocab2id["<PAD>"] = 0
     vocab2id["<START>"] = len(vocab2id) + 1
     vocab2id["<END>"] = len(vocab2id) + 1
     vocab2id["<UNK>"] = len(vocab2id) + 1

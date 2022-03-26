@@ -5,16 +5,35 @@ ljh_dir = str(Path(__file__).parent)
 sys.path.append(ljh_dir)
 
 import os
+from collections import defaultdict
 from PIL import Image
 import torch
 import torch.nn.functional as F
-from torchvision.datasets import Flickr30k
+from torchvision.datasets import VisionDataset
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from utils import create_vocab2id
 
 
-class CustomFlickr30k(Flickr30k):
+class CustomFlickr30k(VisionDataset):
+    def __init__(self, root, ann_file, transform=None, target_transform=None):
+        super().__init__(root, transform=transform, target_transform=target_transform)
+        self.ann_file = os.path.expanduser(ann_file)
+
+        # Read annotations and store in a dict
+        self.annotations = defaultdict(list)
+        with open(self.ann_file) as fh:
+            for line in fh:
+                img_id, caption = line.strip().split("\t")
+                self.annotations[img_id[:-2]].append(caption)
+
+        self.ids = list(sorted(self.annotations.keys()))
+
+        self._create_vocab_map()
+
+    def _create_vocab_map(self, ths_vocab=5):
+        self.vocab2id, self.vocab = create_vocab2id(self.ann_file, ths_vocab=ths_vocab)
+
     def __getitem__(self, idx):
         img_id = self.ids[idx]
 
@@ -29,10 +48,9 @@ class CustomFlickr30k(Flickr30k):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        vocab2id = create_vocab2id(self.ann_file, ths_vocab=5)
         len_caption_max = max(len(caption.split()) for caption in target)
         target = [
-            torch.Tensor([vocab2id.get(word, 0) for word in caption.split()])
+            torch.Tensor([self.vocab2id.get(word, 0) for word in caption.split()])
             for caption in target
         ]
         target = torch.stack(

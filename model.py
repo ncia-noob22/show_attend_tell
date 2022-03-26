@@ -38,21 +38,29 @@ class SoftAttention(nn.Module):
         self.attn_last = nn.Linear(dim_attn, 1)
         self.softmax = nn.Softmax(dim=1)
 
-    def forward(self, encoded_img, previous_txt):
+        # for Doubly Stochastic Attention
+        self.f_beta = nn.Linear(dim_dec, dim_enc)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, encoded_img, hidden_dec):
         score = self.attn_last(
-            self.tanh(self.attn_img(encoded_img) + self.attn_txt(previous_txt))
+            self.tanh(self.attn_img(encoded_img) + self.attn_txt(hidden_dec))
         )
         attn = self.softmax(score) * encoded_img
-        return attn
+
+        # Doubly Stochastic Attention
+        gate = self.sigmoid(self.f_beta(hidden_dec))
+
+        return gate * attn
 
 
-class HardAttention(nn.Module):
+class HardAttention(nn.Module):  #! Not yet implementing
     """Hard attention with Monte-Carlo sampling"""
 
-    def __init__(self):
+    def __init__(self, dim_enc, dim_dec, dim_attn):
         super().__init__()
 
-    def forward(self):
+    def forward(self, encoded_img, hidden_dec):
         pass
 
 
@@ -65,34 +73,49 @@ class RNNDecoder(nn.Module):
         super().__init__()
         self.dim_enc = dim_enc
         self.dim_dec = dim_dec
+        self.size_vocab = size_vocab
 
-        self.decoder = nn.LSTMCell(dim_enc + dim_emb, dim_dec)
+        self.embedding = nn.Embedding(size_vocab, dim_emb)
 
         if type_attn.lower() == "soft":
             self.attn = SoftAttention(dim_enc, dim_dec, dim_attn)
         elif type_attn.lower() == "hard":
             self.attn = HardAttention(dim_enc, dim_dec, dim_attn)
 
-        self.embedding = nn.Embedding(size_vocab, dim_emb)
+        self.rnn = nn.LSTMCell(dim_enc + dim_emb, dim_dec)
 
-        self.f_beta = nn.Linear(dim_dec, dim_enc)
-        self.sigmoid = nn.Sigmoid()
+        self.dropout = nn.Dropout()
         self.fc = nn.Linear(dim_dec, size_vocab)
 
     def init_rnn(self, encoded_img):
         init_c = nn.Linear(self.dim_enc, self.dim_dec)
         init_h = nn.Linear(self.dim_enc, self.dim_dec)
 
-        c = init_c(encoded_img.mean(dim=1))
-        h = init_h(encoded_img.mean(dim=1))
-        return c, h
+        cell = init_c(encoded_img.mean(dim=1))
+        hidden = init_h(encoded_img.mean(dim=1))
+        return cell, hidden
 
-    def forward(self, encoded_img, encoded_txt):
-        emb_txt = self.embedding(encoded_txt)
+    def forward(self, encoded_img, encoded_txt, len_caption):
+        emb_txt = self.embedding(encoded_txt)  # N ✕ len_caption_max ✕ dim_emb
 
-        c, h = self.init_rnn(encoded_img)
+        cell, hidden = self.init_rnn(encoded_img)
 
-        # ~ need to study and align with dataset
+        size_batch = encoded_img.shape[0]
+        len_decode = len_caption.max()
+
+        preds = torch.zeros(size_batch, len_decode, self.size_vocab).to(device)
+
+        for t in range(len_decode):
+            size_batch_t = sum([l > t for l in len_decode])
+            attn = self.attn(encoded_img[:size_batch_t], hidden[:size_batch_t])
+
+            hidden, cell = self.rnn(
+                torch.cat([emb_txt[:size_batch_t, t, :], attn], dim=1),
+                (hidden[:size_batch_t], cell[:size_batch_t]),
+            )
+            preds[:size_batch_t, t, :] = self.fc(self.dropout(hidden))
+
+        return preds, len_decode
 
 
 if __name__ == "__main__":
@@ -107,5 +130,6 @@ if __name__ == "__main__":
 
     encoder = CNNEncoder(**config).to(device)
     decoder = RNNDecoder(**config).to(device)
+    model = decoder(encoder())
 
     print(torchsummary.summary(model, (3, 448, 448), device=device.split(":")[0]))

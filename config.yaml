@@ -12,7 +12,7 @@ type_attn: "soft"
 # train
 dir_hub: "./"
 num_epoch: 1
-num_batch: 64
+size_batch: 64
 
 # caption
 c: 1
