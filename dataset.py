@@ -50,7 +50,7 @@ class CustomFlickr30k(VisionDataset):
 
         len_caption_max = max(len(caption.split()) for caption in target)
         target = [
-            torch.Tensor([self.vocab2id.get(word, 0) for word in caption.split()])
+            torch.FloatTensor([self.vocab2id.get(word, 0) for word in caption.split()])
             for caption in target
         ]
         target = torch.stack(

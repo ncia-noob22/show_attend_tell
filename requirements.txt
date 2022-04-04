@@ -1,7 +1,12 @@
+# for data processing
 pyyaml==6.0
 pandas==1.4.1
+
+# for modeling
 torch==1.11.0
 torchvision==0.12.0
 torchsummary==1.5.1
 tqdm==4.63.0
+
+# miscellaneous
 black

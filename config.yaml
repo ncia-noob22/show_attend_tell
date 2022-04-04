@@ -3,11 +3,15 @@ pretrained_dec: "checkpoints/pretrained_dec.pth"
 
 # model
 size_enc: 14
+dim_enc: 10
+dim_dec: 10
+dim_attn: 10
+dim_emb: 10
+type_attn: "soft"
 
 # data
 dir_img: "/data/Flickr30k/img/"
 path_ann: "/data/Flickr30k/ann/results_20130124.token"
-type_attn: "soft"
 
 # train
 dir_hub: "./"

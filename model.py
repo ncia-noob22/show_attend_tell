@@ -129,7 +129,10 @@ if __name__ == "__main__":
         config = yaml.load(f, yaml.FullLoader)
 
     encoder = CNNEncoder(**config).to(device)
-    decoder = RNNDecoder(**config).to(device)
-    model = decoder(encoder())
+    encoded = encoder(torch.randn(1, 3, 448, 448))
+    decoder = RNNDecoder(size_vocab=16, **config).to(device)
+    len_caption = 10  # ?
+    decoder(encoded, torch.randn(5, len_caption), len_caption)
 
-    print(torchsummary.summary(model, (3, 448, 448), device=device.split(":")[0]))
+    print(torchsummary.summary(encoder, (3, 448, 448), device=device.split(":")[0]))
+    print(torchsummary.summary(decoder, [(196, 512), ()], device=device.split(":")[0]))
